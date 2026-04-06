@@ -20,7 +20,7 @@ export function AddChannel() {
 
   if (!isOpen) {
     return (
-      <div className="mt-8 flex justify-center">
+      <div className="mb-4 flex justify-center">
         <button
           onClick={() => setIsOpen(true)}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] transition-colors"
@@ -33,7 +33,7 @@ export function AddChannel() {
   }
 
   return (
-    <div className="mt-8 bg-white rounded-xl border border-gray-200 p-4">
+    <div className="mb-4 bg-white rounded-xl border border-gray-200 p-4">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-gray-800">Добавить канал</h3>
         <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600">

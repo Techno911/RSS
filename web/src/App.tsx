@@ -75,8 +75,8 @@ export default function App() {
         onClearChannels={() => setSelectedChannels(new Set())}
         totalCount={postsForChannelCounts.length}
       />
-      <PostList posts={dedupedPosts} />
       <AddChannel />
+      <PostList posts={dedupedPosts} />
     </div>
   );
 }
