@@ -1,0 +1,11 @@
+{
+  "name": "telegram-digest",
+  "private": true,
+  "workspaces": ["parser", "web"],
+  "scripts": {
+    "parse": "npm run start --workspace=parser",
+    "dev": "npm run dev --workspace=web",
+    "build": "npm run build --workspace=web",
+    "generate": "npm run parse && npm run build"
+  }
+}
