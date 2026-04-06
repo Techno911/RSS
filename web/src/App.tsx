@@ -3,7 +3,9 @@ import { digestData } from './data';
 import { Header } from './components/Header';
 import { FilterBar } from './components/FilterBar';
 import { PostList } from './components/PostList';
+import { AddChannel } from './components/AddChannel';
 import { filterPosts, filterByTime, countByChannel } from './utils/filters';
+import { deduplicatePosts } from './utils/dedup';
 import type { TimePeriod } from './types';
 
 export default function App() {
@@ -36,6 +38,11 @@ export default function App() {
     [timePeriod, selectedChannels, searchQuery],
   );
 
+  const dedupedPosts = useMemo(
+    () => deduplicatePosts(filteredPosts),
+    [filteredPosts],
+  );
+
   const handleToggleChannel = useCallback((handle: string) => {
     setSelectedChannels((prev) => {
       const next = new Set(prev);
@@ -51,7 +58,7 @@ export default function App() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <Header
-        postCount={filteredPosts.length}
+        postCount={dedupedPosts.length}
         channelCount={channelCounts.size}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -68,7 +75,8 @@ export default function App() {
         onClearChannels={() => setSelectedChannels(new Set())}
         totalCount={postsForChannelCounts.length}
       />
-      <PostList posts={filteredPosts} />
+      <PostList posts={dedupedPosts} />
+      <AddChannel />
     </div>
   );
 }

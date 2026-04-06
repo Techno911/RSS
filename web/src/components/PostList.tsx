@@ -1,9 +1,9 @@
-import type { TelegramPost } from '../types';
+import type { DeduplicatedPost } from '../utils/dedup';
 import { PostCard } from './PostCard';
 import { EmptyState } from './EmptyState';
 
 interface PostListProps {
-  posts: TelegramPost[];
+  posts: DeduplicatedPost[];
 }
 
 export function PostList({ posts }: PostListProps) {
@@ -13,8 +13,8 @@ export function PostList({ posts }: PostListProps) {
 
   return (
     <div className="space-y-3">
-      {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+      {posts.map(({ post, alsoIn }) => (
+        <PostCard key={post.id} post={post} alsoIn={alsoIn} />
       ))}
     </div>
   );
