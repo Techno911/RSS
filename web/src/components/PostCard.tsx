@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { Eye, ExternalLink } from 'lucide-react';
 import type { TelegramPost } from '../types';
 import { timeAgo } from '../utils/formatters';
@@ -32,7 +33,7 @@ export function PostCard({ post, alsoIn }: PostCardProps) {
       {post.textHtml ? (
         <div
           className="text-gray-800 text-sm leading-relaxed prose prose-sm max-w-none prose-a:text-[#F97316] prose-a:no-underline hover:prose-a:underline"
-          dangerouslySetInnerHTML={{ __html: post.textHtml }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.textHtml, { ADD_ATTR: ['target'] }) }}
         />
       ) : post.text ? (
         <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">

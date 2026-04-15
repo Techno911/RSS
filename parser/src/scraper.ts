@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import type { TelegramPost, Reaction } from './types.js';
-import { sleep, parseCount, extractBgImage } from './utils.js';
+import { sleep, parseCount, extractBgImage, fetchWithRetry } from './utils.js';
 
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
@@ -60,7 +60,7 @@ export async function scrapeChannel(
 
     let html: string;
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         headers: { 'User-Agent': USER_AGENT },
       });
       if (!response.ok) {
@@ -69,7 +69,7 @@ export async function scrapeChannel(
       }
       html = await response.text();
     } catch (err) {
-      console.warn(`  [${handle}] fetch error:`, err);
+      console.warn(`  [${handle}] fetch error after retries:`, err);
       break;
     }
 

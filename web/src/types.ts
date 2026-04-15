@@ -34,3 +34,4 @@ export interface DigestData {
 }
 
 export type TimePeriod = '24h' | '3d' | '7d' | 'all';
+export type SortMode = 'date' | 'views' | 'reactions';

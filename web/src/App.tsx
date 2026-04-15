@@ -2,11 +2,12 @@ import { useState, useMemo, useCallback } from 'react';
 import { digestData } from './data';
 import { Header } from './components/Header';
 import { FilterBar } from './components/FilterBar';
+import { Trending } from './components/Trending';
 import { PostList } from './components/PostList';
 import { AddChannel } from './components/AddChannel';
 import { filterPosts, filterByTime, countByChannel } from './utils/filters';
 import { deduplicatePosts } from './utils/dedup';
-import type { TimePeriod } from './types';
+import type { TimePeriod, SortMode } from './types';
 
 const HIDDEN_KEY = 'digest-hidden-channels';
 
@@ -26,6 +27,7 @@ export default function App() {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('7d');
   const [selectedChannels, setSelectedChannels] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortMode, setSortMode] = useState<SortMode>('date');
   const [hiddenChannels, setHiddenChannels] = useState<Set<string>>(loadHidden);
 
   const handleHideChannel = useCallback((handle: string) => {
@@ -35,7 +37,6 @@ export default function App() {
       saveHidden(next);
       return next;
     });
-    // Also deselect if it was selected
     setSelectedChannels((prev) => {
       if (!prev.has(handle)) return prev;
       const next = new Set(prev);
@@ -63,7 +64,6 @@ export default function App() {
     [timePeriod],
   );
 
-  // Channel counts respect both time and search filters (but not channel selection)
   const postsForChannelCounts = useMemo(() => {
     let result = timeFilteredPosts;
     if (searchQuery.trim()) {
@@ -78,17 +78,31 @@ export default function App() {
     [postsForChannelCounts],
   );
 
-  // Filter posts also excluding hidden channels
   const filteredPosts = useMemo(
     () => filterPosts(digestData.posts, { timePeriod, selectedChannels, searchQuery })
       .filter((p) => !hiddenChannels.has(p.channel)),
     [timePeriod, selectedChannels, searchQuery, hiddenChannels],
   );
 
-  const dedupedPosts = useMemo(
-    () => deduplicatePosts(filteredPosts),
-    [filteredPosts],
-  );
+  const dedupedPosts = useMemo(() => {
+    const deduped = deduplicatePosts(filteredPosts);
+    // Sort
+    if (sortMode === 'views') {
+      return [...deduped].sort((a, b) => b.post.viewsNum - a.post.viewsNum);
+    }
+    if (sortMode === 'reactions') {
+      return [...deduped].sort((a, b) => b.post.reactionsTotal - a.post.reactionsTotal);
+    }
+    return deduped; // already sorted by date from parser
+  }, [filteredPosts, sortMode]);
+
+  // Trending: top 5 posts by views for the current time period (excluding hidden)
+  const trendingPosts = useMemo(() => {
+    const visible = timeFilteredPosts.filter((p) => !hiddenChannels.has(p.channel));
+    return [...visible]
+      .sort((a, b) => b.viewsNum - a.viewsNum)
+      .slice(0, 5);
+  }, [timeFilteredPosts, hiddenChannels]);
 
   const handleToggleChannel = useCallback((handle: string) => {
     setSelectedChannels((prev) => {
@@ -102,7 +116,6 @@ export default function App() {
     });
   }, []);
 
-  // Visible post count for header (exclude hidden)
   const visibleForCounts = useMemo(
     () => postsForChannelCounts.filter((p) => !hiddenChannels.has(p.channel)),
     [postsForChannelCounts, hiddenChannels],
@@ -115,6 +128,8 @@ export default function App() {
         channelCount={channelCounts.size - hiddenChannels.size}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        sortMode={sortMode}
+        onSortChange={setSortMode}
       />
       <FilterBar
         timePeriod={timePeriod}
@@ -132,6 +147,9 @@ export default function App() {
         onRestoreChannel={handleRestoreChannel}
         onRestoreAll={handleRestoreAll}
       />
+      {!searchQuery && selectedChannels.size === 0 && trendingPosts.length > 0 && (
+        <Trending posts={trendingPosts} />
+      )}
       <AddChannel />
       <PostList posts={dedupedPosts} />
     </div>
