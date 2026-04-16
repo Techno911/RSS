@@ -125,7 +125,7 @@ export default function App() {
     <div className="max-w-2xl mx-auto px-4 py-8">
       <Header
         postCount={dedupedPosts.length}
-        channelCount={channelCounts.size - hiddenChannels.size}
+        channelCount={Array.from(channelCounts.keys()).filter((h) => !hiddenChannels.has(h)).length}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         sortMode={sortMode}
