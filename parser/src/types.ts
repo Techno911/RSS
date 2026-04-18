@@ -31,4 +31,5 @@ export interface DigestData {
   generatedAt: string;
   channels: ChannelMeta[];
   posts: TelegramPost[];
+  weeklySummary?: string;
 }

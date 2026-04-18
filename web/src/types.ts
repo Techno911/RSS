@@ -31,7 +31,8 @@ export interface DigestData {
   generatedAt: string;
   channels: ChannelMeta[];
   posts: TelegramPost[];
+  weeklySummary?: string;
 }
 
 export type TimePeriod = '24h' | '3d' | '7d' | 'all';
-export type SortMode = 'date' | 'views' | 'reactions';
+export type SortMode = 'date' | 'views' | 'reactions' | 'score';

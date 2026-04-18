@@ -3,9 +3,10 @@ import { digestData } from './data';
 import { Header } from './components/Header';
 import { FilterBar } from './components/FilterBar';
 import { Trending } from './components/Trending';
+import { WeeklySummary } from './components/WeeklySummary';
 import { PostList } from './components/PostList';
 import { AddChannel } from './components/AddChannel';
-import { filterPosts, filterByTime, countByChannel } from './utils/filters';
+import { filterPosts, filterByTime, countByChannel, engagementScore } from './utils/filters';
 import { deduplicatePosts } from './utils/dedup';
 import type { TimePeriod, SortMode } from './types';
 
@@ -93,14 +94,17 @@ export default function App() {
     if (sortMode === 'reactions') {
       return [...deduped].sort((a, b) => b.post.reactionsTotal - a.post.reactionsTotal);
     }
+    if (sortMode === 'score') {
+      return [...deduped].sort((a, b) => engagementScore(b.post) - engagementScore(a.post));
+    }
     return deduped; // already sorted by date from parser
   }, [filteredPosts, sortMode]);
 
-  // Trending: top 5 posts by views for the current time period (excluding hidden)
+  // Trending: top 5 posts by engagement score (excluding hidden)
   const trendingPosts = useMemo(() => {
     const visible = timeFilteredPosts.filter((p) => !hiddenChannels.has(p.channel));
     return [...visible]
-      .sort((a, b) => b.viewsNum - a.viewsNum)
+      .sort((a, b) => engagementScore(b) - engagementScore(a))
       .slice(0, 5);
   }, [timeFilteredPosts, hiddenChannels]);
 
@@ -147,8 +151,11 @@ export default function App() {
         onRestoreChannel={handleRestoreChannel}
         onRestoreAll={handleRestoreAll}
       />
-      {!searchQuery && selectedChannels.size === 0 && trendingPosts.length > 0 && (
-        <Trending posts={trendingPosts} />
+      {!searchQuery && selectedChannels.size === 0 && (
+        <>
+          {digestData.weeklySummary && <WeeklySummary summary={digestData.weeklySummary} />}
+          {trendingPosts.length > 0 && <Trending posts={trendingPosts} />}
+        </>
       )}
       <AddChannel />
       <PostList posts={dedupedPosts} />

@@ -14,6 +14,7 @@ const SORT_OPTIONS: { value: SortMode; label: string }[] = [
   { value: 'date', label: 'По дате' },
   { value: 'views', label: 'По просмотрам' },
   { value: 'reactions', label: 'По реакциям' },
+  { value: 'score', label: 'По вовлечённости' },
 ];
 
 export function Header({ postCount, channelCount, searchQuery, onSearchChange, sortMode, onSortChange }: HeaderProps) {

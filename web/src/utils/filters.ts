@@ -35,6 +35,18 @@ export function filterPosts(
   return result;
 }
 
+/**
+ * Engagement score: combines views, reactions, and content quality.
+ * Reactions weighted 10x views (engagement > reach).
+ * Content bonus for substantial text with links.
+ */
+export function engagementScore(post: TelegramPost): number {
+  const viewScore = Math.log10(Math.max(post.viewsNum, 1));
+  const reactionScore = Math.log10(Math.max(post.reactionsTotal, 1)) * 3;
+  const contentBonus = post.text.length > 200 ? 0.5 : 0;
+  return viewScore + reactionScore + contentBonus;
+}
+
 export function countByChannel(posts: TelegramPost[]): Map<string, { title: string; count: number }> {
   const map = new Map<string, { title: string; count: number }>();
   for (const p of posts) {

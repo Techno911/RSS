@@ -39,6 +39,16 @@ jobs:
       - name: Parse Telegram channels
         run: npx tsx parser/src/index.ts
 
+      - name: Generate weekly summary
+        run: npx tsx parser/src/summarize.ts
+
+      - name: Send Telegram notification
+        if: env.TELEGRAM_BOT_TOKEN != ''
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: npx tsx parser/src/notify.ts
+
       - name: Build web
         run: |
           cd web

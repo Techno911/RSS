@@ -60,10 +60,27 @@ async function main() {
     }
   }
 
+  // Validate data
+  const validPosts = uniquePosts.filter((p) => {
+    if (!p.id || !p.channel) return false;
+    if (!p.date || isNaN(new Date(p.date).getTime())) return false;
+    return true;
+  });
+
+  const dropped = uniquePosts.length - validPosts.length;
+  if (dropped > 0) {
+    console.warn(`Validation: dropped ${dropped} posts with missing id/channel/date`);
+  }
+
+  if (validPosts.length === 0) {
+    console.error('No valid posts parsed! Aborting to prevent empty digest.');
+    process.exit(1);
+  }
+
   const data: DigestData = {
     generatedAt: new Date().toISOString(),
     channels: Array.from(channelMap.values()).sort((a, b) => b.postCount - a.postCount),
-    posts: uniquePosts,
+    posts: validPosts,
   };
 
   const outDir = resolve(__dirname, '../../data');
@@ -71,7 +88,7 @@ async function main() {
   const outPath = resolve(outDir, 'posts.json');
   writeFileSync(outPath, JSON.stringify(data, null, 2), 'utf-8');
 
-  console.log(`Done! ${uniquePosts.length} posts from ${channelMap.size} channels`);
+  console.log(`Done! ${validPosts.length} posts from ${channelMap.size} channels`);
   console.log(`Written to ${outPath}`);
 }
 
